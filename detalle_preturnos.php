@@ -262,19 +262,21 @@ if (isloggedin() && !isguestuser()) {
                             <section class="section_general">
                                 <div class="filters">
                                     <div class="filter-group date-filters">
-                                        <label>
-                                            Curso
-                                            <select id="cursoSelect" class="form-control">
-                                                <option value="">Todos</option>
-                                            </select>
-                                        </label>
+                                        <div class="sub-filter-group">
+                                            <label>
+                                                Curso
+                                                <select id="cursoSelect" class="form-control">
+                                                    <option value="">Todos</option>
+                                                </select>
+                                            </label>
 
-                                        <label>
-                                            Sección
-                                            <select id="sectionSelect" class="form-control" disabled>
-                                                <option value="">Seleccione un curso</option>
-                                            </select>
-                                        </label>
+                                            <label>
+                                                Sección
+                                                <select id="sectionSelect" class="form-control" disabled>
+                                                    <option value="">Seleccione un curso</option>
+                                                </select>
+                                            </label>
+                                        </div>
 
                                         <label>
                                             Estudiante
@@ -282,6 +284,24 @@ if (isloggedin() && !isguestuser()) {
                                                 <option value="">Todos</option>
                                             </select>
                                         </label>
+
+                                        <div class="sub-filter-group">
+                                            <label>
+                                                Fecha inicio
+                                                <input type="date" id="dateStart" class="form-control">
+                                            </label>
+
+                                            <label>
+                                                Fecha fin
+                                                <input type="date" id="dateEnd" class="form-control">
+                                            </label>
+                                        </div>
+
+                                        <div style="margin-top: 1rem;">
+                                            <button id="clearFilters" class="btn btn-secondary">
+                                                Limpiar filtros
+                                            </button>
+                                        </div>
 
                                     </div>
 
@@ -307,12 +327,12 @@ if (isloggedin() && !isguestuser()) {
 
                                     <div class="kpi-card">
                                         <h6>% Cobertura</h6>
-                                        <h3 id="kpiPercent">0%</h3>
+                                        <div id="kpiPercentChart"></div>
                                     </div>
 
                                     <div class="kpi-card">
                                         <h6>Promedio de nota</h6>
-                                        <h3 id="kpiAvgGrade">—</h3>
+                                        <div id="kpiAvgGradeChart"></div>
                                     </div>
 
                                 </div>
@@ -635,7 +655,7 @@ if (isloggedin() && !isguestuser()) {
 
     @media (min-width: 768px) {
         .section_general {
-            width: 76vw;
+            width: 100%;
         }
     }
 
@@ -798,9 +818,12 @@ if (isloggedin() && !isguestuser()) {
 
     /* Valor */
     .kpi-card h3 {
-        font-size: 20px;
-        font-weight: 700;
-        margin: 0;
+        font-size: 32px;
+        font-weight: bold;
+        display: flex;
+        height: 100%;
+        align-items: center;
+        justify-content: center;
     }
 
     /* Colores individuales */
@@ -850,7 +873,7 @@ if (isloggedin() && !isguestuser()) {
     .table-loader {
         position: absolute;
         inset: 0;
-        background: rgba(255,255,255,0.8);
+        background: rgba(255, 255, 255, 0.8);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -864,10 +887,29 @@ if (isloggedin() && !isguestuser()) {
         display: none !important;
     }
 
-    .btn-secondary{
+    .btn-secondary {
         color: #fff;
-        background-color: #858796 !important;;
-        border-color: #858796 !important;;
+        background-color: #858796 !important;
+        ;
+        border-color: #858796 !important;
+        ;
     }
 
+    .kpi-card .apexcharts-canvas {
+        margin: auto;
+    }
+
+    .sub-filter-group{
+        display: flex;
+        width: 100%;
+        flex-direction: column;
+    }
+
+    @media (min-width: 768px) {
+        .sub-filter-group{
+            gap: 1rem;
+            flex-direction: row;
+        }
+    }
+   
 </style>

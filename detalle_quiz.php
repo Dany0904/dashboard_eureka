@@ -262,19 +262,21 @@ if (isloggedin() && !isguestuser()) {
                             <section class="section_general">
                                 <div class="filters">
                                     <div class="filter-group date-filters">
-                                        <label>
-                                            Curso
-                                            <select id="cursoSelectQuiz" class="form-control">
-                                                <option value="">Todos</option>
-                                            </select>
-                                        </label>
+                                        <div class="sub-filter-group">
+                                            <label>
+                                                Curso
+                                                <select id="cursoSelectQuiz" class="form-control">
+                                                    <option value="">Todos</option>
+                                                </select>
+                                            </label>
 
-                                        <label>
-                                            Sección
-                                            <select id="sectionSelectQuiz" class="form-control" disabled>
-                                                <option value="">Seleccione un curso</option>
-                                            </select>
-                                        </label>
+                                            <label>
+                                                Sección
+                                                <select id="sectionSelectQuiz" class="form-control" disabled>
+                                                    <option value="">Seleccione un curso</option>
+                                                </select>
+                                            </label>
+                                        </div>
 
                                         <label>
                                             Estudiante
@@ -282,6 +284,23 @@ if (isloggedin() && !isguestuser()) {
                                                 <option value="">Todos</option>
                                             </select>
                                         </label>
+                                        <div class="sub-filter-group">
+                                            <label>
+                                                Fecha inicio
+                                                <input type="date" id="dateStartQuiz" class="form-control">
+                                            </label>
+
+                                            <label>
+                                                Fecha fin
+                                                <input type="date" id="dateEndQuiz" class="form-control">
+                                            </label>
+                                        </div>
+
+                                        <div style="margin-top: 1rem;">
+                                            <button id="clearFiltersQuiz" class="btn btn-secondary">
+                                                Limpiar filtros
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </section>
@@ -305,12 +324,12 @@ if (isloggedin() && !isguestuser()) {
 
                                     <div class="kpi-card">
                                         <h6>% Cobertura</h6>
-                                        <h3 id="kpiPercentQuiz">0%</h3>
+                                        <h3 id="kpiPercentQuizChart">0%</h3>
                                     </div>
 
                                     <div class="kpi-card">
                                         <h6>Promedio de nota</h6>
-                                        <h3 id="kpiAvgGradeQuiz">0</h3>
+                                        <h3 id="kpiAvgGradeQuizChart">0</h3>
                                     </div>
 
                                 </div>
@@ -634,7 +653,7 @@ if (isloggedin() && !isguestuser()) {
 
     @media (min-width: 768px) {
         .section_general {
-            width: 76vw;
+            width: 100%;
         }
     }
 
@@ -839,6 +858,19 @@ if (isloggedin() && !isguestuser()) {
 
         .kpi-card h3 {
             font-size: 18px;
+        }
+    }
+    
+    .sub-filter-group{
+        display: flex;
+        width: 100%;
+        flex-direction: column;
+    }
+
+    @media (min-width: 768px) {
+        .sub-filter-group{
+            gap: 1rem;
+            flex-direction: row;
         }
     }
 </style>

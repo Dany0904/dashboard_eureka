@@ -21,6 +21,16 @@ header('Content-Type: application/json');
 $courseid  = optional_param('courseid', 0, PARAM_INT);
 $userid    = optional_param('userid', 0, PARAM_INT);
 $sectionid = optional_param('sectionid', 0, PARAM_INT);
+$datestart = optional_param('datestart', '', PARAM_TEXT);
+$dateend   = optional_param('dateend', '', PARAM_TEXT);
+
+if ($datestart) {
+    $starttimestamp = strtotime($datestart . ' 00:00:00');
+}
+
+if ($dateend) {
+    $endtimestamp = strtotime($dateend . ' 23:59:59');
+}
 
 if ($courseid <= 0) {
     echo json_encode([
@@ -72,6 +82,16 @@ WHERE qa.state = 'finished'
 AND q.course = :courseid_completed
 ";
 
+if ($datestart) {
+    $sqlCompleted .= " AND qa.timefinish >= :datestart";
+    $paramsCompleted['datestart'] = $starttimestamp;
+}
+
+if ($dateend) {
+    $sqlCompleted .= " AND qa.timefinish <= :dateend";
+    $paramsCompleted['dateend'] = $endtimestamp;
+}
+
 if ($sectionid > 0) {
     $sqlCompleted .= " AND cm.section = :sectionid_completed";
     $paramsCompleted['sectionid_completed'] = $sectionid;
@@ -92,11 +112,27 @@ SELECT
 FROM {grade_grades} gg
 JOIN {grade_items} gi ON gi.id = gg.itemid
 JOIN {quiz} q ON q.id = gi.iteminstance
-JOIN {course_modules} cm ON cm.instance = q.id
+JOIN {course_modules} cm 
+    ON cm.instance = q.id
+    AND cm.course = gi.courseid
+JOIN {quiz_attempts} qa 
+    ON qa.quiz = q.id 
+    AND qa.userid = gg.userid
 WHERE gi.courseid = :courseid_grades
 AND gi.itemmodule = 'quiz'
 AND gi.grademax > 0
+AND qa.state = 'finished'
 ";
+
+if ($datestart) {
+    $sqlGrades .= " AND qa.timefinish >= :datestart_grades";
+    $paramsGrades['datestart_grades'] = $starttimestamp;
+}
+
+if ($dateend) {
+    $sqlGrades .= " AND qa.timefinish <= :dateend_grades";
+    $paramsGrades['dateend_grades'] = $endtimestamp;
+}
 
 if ($sectionid > 0) {
     $sqlGrades .= " AND cm.section = :sectionid_grades";
@@ -132,7 +168,7 @@ JOIN {user_enrolments} ue
     ON ue.userid = u.id AND ue.status = 0
 JOIN {enrol} e
     ON e.id = ue.enrolid AND e.courseid = :courseid_users
-LEFT JOIN ($sqlCompleted) c
+INNER JOIN ($sqlCompleted) c
     ON c.userid = u.id
 LEFT JOIN ($sqlGrades) g
     ON g.userid = u.id
@@ -244,12 +280,21 @@ JOIN {course_modules} cm ON cm.instance = q.id
 LEFT JOIN {quiz_attempts} qa
     ON qa.quiz = q.id
     AND qa.state = 'finished'
-WHERE q.course = :courseid_chart
 ";
 
 if ($sectionid > 0) {
     $sqlQuizChart .= " AND cm.section = :sectionid_chart";
     $paramsChart['sectionid_chart'] = $sectionid;
+}
+
+if ($datestart) {
+    $sqlQuizChart .= " AND qa.timefinish >= :datestart_chart";
+    $paramsChart['datestart_chart'] = $starttimestamp;
+}
+
+if ($dateend) {
+    $sqlQuizChart .= " AND qa.timefinish <= :dateend_chart";
+    $paramsChart['dateend_chart'] = $endtimestamp;
 }
 
 $sqlQuizChart .= " GROUP BY q.id, q.name ORDER BY q.name";

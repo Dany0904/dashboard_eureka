@@ -21,6 +21,18 @@ header('Content-Type: application/json');
 $courseid  = optional_param('courseid', 0, PARAM_INT);
 $userid    = optional_param('userid', 0, PARAM_INT);
 $sectionid = optional_param('sectionid', 0, PARAM_INT);
+$datestart = optional_param('datestart', '', PARAM_TEXT);
+$dateend   = optional_param('dateend', '', PARAM_TEXT);
+
+$dateFilter = '';
+
+if ($datestart) {
+    $starttimestamp = strtotime($datestart . ' 00:00:00');
+}
+
+if ($dateend) {
+    $endtimestamp = strtotime($dateend . ' 23:59:59');
+}
 
 if ($courseid <= 0) {
     echo json_encode([
@@ -99,6 +111,16 @@ if ($sectionid > 0) {
     $paramsCompleted['sectionid_completed'] = $sectionid;
 }
 
+if ($datestart) {
+    $sqlCompleted .= " AND cmc.timemodified >= :datestart";
+    $paramsCompleted['datestart'] = $starttimestamp;
+}
+
+if ($dateend) {
+    $sqlCompleted .= " AND cmc.timemodified <= :dateend";
+    $paramsCompleted['dateend'] = $endtimestamp;
+}
+
 $sqlCompleted .= " GROUP BY cmc.userid";
 
 /* ======================================================
@@ -114,14 +136,28 @@ SELECT
 FROM {grade_grades} gg
 JOIN {grade_items} gi ON gi.id = gg.itemid
 JOIN {course_modules} cm ON cm.instance = gi.iteminstance
+JOIN {course_modules_completion} cmc 
+    ON cmc.coursemoduleid = cm.id
+    AND cmc.userid = gg.userid
 WHERE gi.courseid = :courseid_grades
 AND cm.module $inSqlGrades
 AND gi.grademax > 0
+AND cmc.completionstate = 1
 ";
 
 if ($sectionid > 0) {
     $sqlGrades .= " AND cm.section = :sectionid_grades";
     $paramsGrades['sectionid_grades'] = $sectionid;
+}
+
+if ($datestart) {
+    $sqlGrades .= " AND cmc.timemodified >= :datestart_grades";
+    $paramsGrades['datestart_grades'] = $starttimestamp;
+}
+
+if ($dateend) {
+    $sqlGrades .= " AND cmc.timemodified <= :dateend_grades";
+    $paramsGrades['dateend_grades'] = $endtimestamp;
 }
 
 $sqlGrades .= " GROUP BY gg.userid";
@@ -153,7 +189,7 @@ JOIN {user_enrolments} ue
     ON ue.userid = u.id AND ue.status = 0
 JOIN {enrol} e
     ON e.id = ue.enrolid AND e.courseid = :courseid_main
-LEFT JOIN ($sqlCompleted) c
+INNER JOIN ($sqlCompleted) c
     ON c.userid = u.id
 LEFT JOIN ($sqlGrades) g
     ON g.userid = u.id
@@ -220,6 +256,16 @@ AND cm.deletioninprogress = 0
 if ($sectionid > 0) {
     $sqlActivityChart .= " AND cm.section = :sectionid_activity";
     $paramsActivity['sectionid_activity'] = $sectionid;
+}
+
+if ($datestart) {
+    $sqlActivityChart .= " AND cmc.timemodified >= :datestart_activity";
+    $paramsActivity['datestart_activity'] = $starttimestamp;
+}
+
+if ($dateend) {
+    $sqlActivityChart .= " AND cmc.timemodified <= :dateend_activity";
+    $paramsActivity['dateend_activity'] = $endtimestamp;
 }
 
 $sqlActivityChart .= "

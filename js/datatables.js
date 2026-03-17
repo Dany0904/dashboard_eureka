@@ -1357,6 +1357,12 @@ $(document).ready(function () {
 
 //Codigo nuevo implementacion Eureka
 
+var percentChart = createGaugeChart("#kpiPercentChart", 0);
+var gradeChart = createGaugeChart("#kpiAvgGradeChart", 0);
+
+var percentChartQuiz = createGaugeChart("#kpiPercentQuizChart", 0);
+var gradeChartQuiz = createGaugeChart("#kpiAvgGradeQuizChart", 0);
+
 //table cursos por año
 var tablaUsuarios = $("#tablaUsuarios").DataTable({
   ajax: {
@@ -1366,15 +1372,18 @@ var tablaUsuarios = $("#tablaUsuarios").DataTable({
       d.userid = $("#studentSelect").val() || 0;
       d.courseid = $("#cursoSelect").val() || null;
       d.sectionid = $("#sectionSelect").val() || 0;
+      d.datestart = $("#dateStart").val();
+      d.dateend = $("#dateEnd").val();
     },
     dataSrc: function (json) {
       $("#kpiTotal").text(json.kpis.totalh5p);
       $("#kpiDone").text(json.kpis.completed);
       $("#kpiPending").text(json.kpis.pending);
-      $("#kpiPercent").text(json.kpis.percentage + "%");
-      $("#kpiAvgGrade").text(
-        json.kpis.avggrade !== null ? json.kpis.avggrade : "—",
-      );
+      percentChart.updateSeries([json.kpis.percentage]);
+
+      gradeChart.updateSeries([
+        json.kpis.avggrade !== null ? json.kpis.avggrade : 0
+      ]);
 
       if (json.chart) {
         renderH5PChart(
@@ -1468,6 +1477,33 @@ $(document).ready(function () {
 
 $("#cursoSelect").on("change", function () {
   tablaUsuarios.ajax.reload(null, false);
+});
+
+$("#dateStart, #dateEnd").on("change", function () {
+  tablaUsuarios.ajax.reload();
+});
+
+$("#clearFilters").on("click", function () {
+  const courseid = $("#cursoSelect").val();
+
+  $("#dateStart").val("");
+  $("#dateEnd").val("");
+
+  if (!courseid) {
+    // Estado inicial
+    $("#studentSelect")
+      .html('<option value="">Todos</option>')
+      .prop("disabled", false);
+
+    $("#sectionSelect")
+      .html('<option value="">Seleccione un curso</option>')
+      .prop("disabled", true);
+  } else {
+    // Dispara recarga natural
+    $("#cursoSelect").trigger("change");
+  }
+
+  tablaUsuarios.ajax.reload();
 });
 
 $("#cursoSelect").on("change", function () {
@@ -1879,13 +1915,17 @@ var tablaUsuariosQuiz = $("#tablaUsuariosQuiz").DataTable({
       d.userid = $("#studentSelectQuiz").val() || 0;
       d.courseid = $("#cursoSelectQuiz").val() || 0;
       d.sectionid = $("#sectionSelectQuiz").val() || 0;
+      d.datestart = $("#dateStartQuiz").val();
+      d.dateend = $("#dateEndQuiz").val();
     },
     dataSrc: function (json) {
       $("#kpiTotalQuiz").text(json.kpis.totalquiz);
       $("#kpiDoneQuiz").text(json.kpis.completed);
       $("#kpiPendingQuiz").text(json.kpis.pending);
-      $("#kpiPercentQuiz").text(json.kpis.percentage + "%");
-      $("#kpiAvgGradeQuiz").text(json.kpis.avggrade);
+      percentChartQuiz.updateSeries([json.kpis.percentage]);
+      gradeChartQuiz.updateSeries([
+        json.kpis.avggrade !== null ? json.kpis.avggrade : 0
+      ]);
 
       if (json.chart) {
         renderH5PChartQuiz(
@@ -1936,10 +1976,37 @@ var tablaUsuariosQuiz = $("#tablaUsuariosQuiz").DataTable({
   },
 });
 
+$("#dateStartQuiz, #dateEndQuiz").on("change", function () {
+  tablaUsuariosQuiz.ajax.reload();
+});
+
 $("#sectionSelectQuiz").on("change", function () {
 
   $("#quizLoader").show();
   $("#tablaUsuariosQuiz").hide();
+
+  tablaUsuariosQuiz.ajax.reload();
+});
+
+$("#clearFiltersQuiz").on("click", function () {
+  const courseid = $("#cursoSelectQuiz").val();
+
+  $("#dateStartQuiz").val("");
+  $("#dateEndQuiz").val("");
+
+  if (!courseid) {
+    // Estado inicial
+    $("#studentSelectQuiz")
+      .html('<option value="">Todos</option>')
+      .prop("disabled", false);
+
+    $("#sectionSelectQuiz")
+      .html('<option value="">Seleccione un curso</option>')
+      .prop("disabled", true);
+  } else {
+    // Dispara recarga natural
+    $("#cursoSelectQuiz").trigger("change");
+  }
 
   tablaUsuariosQuiz.ajax.reload();
 });
@@ -2219,4 +2286,64 @@ function renderSectionComplianceChartQuiz(labels, compliance) {
   );
 
   sectionChartQuiz.render();
+}
+
+function createGaugeChart(el, value) {
+
+  var options = {
+    series: [value],
+    chart: {
+      height: 160,
+      type: "radialBar"
+    },
+    plotOptions: {
+      radialBar: {
+        startAngle: -90,
+        endAngle: 90,
+        hollow: {
+          size: "55%"
+        },
+        track: {
+          background: "#eee",
+          strokeWidth: "100%"
+        },
+        dataLabels: {
+          name: {
+            show: false
+          },
+          value: {
+            fontSize: "28px",
+            fontWeight: 700,
+            offsetY: 10,
+            formatter: function(val) {
+              return Math.round(val) + "%";
+            }
+          }
+        }
+      }
+    },
+    fill: {
+      type: "gradient",
+      gradient: {
+        shade: "light",
+        type: "horizontal",
+        gradientToColors: ["#00c853"],
+        stops: [0, 50, 75, 100],
+        colorStops: [
+          { offset: 0, color: "#ff0000" },
+          { offset: 50, color: "#ff9800" },
+          { offset: 75, color: "#ffeb3b" },
+          { offset: 100, color: "#00c853" }
+        ]
+      }
+    },
+    stroke: {
+      lineCap: "round"
+    }
+  };
+
+  var chart = new ApexCharts(document.querySelector(el), options);
+  chart.render();
+
+  return chart;
 }
