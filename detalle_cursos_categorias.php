@@ -155,7 +155,7 @@ if (isloggedin() && !isguestuser()) {
             <li class="nav-item active">
                 <a class="nav-link" href="./detalle_calificaciones.php">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>Reporde de Calificaciones</span></a>
+                    <span>Reporte de Calificaciones</span></a>
             </li>
 
             <!-- Divider -->
