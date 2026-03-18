@@ -259,9 +259,60 @@ if (isloggedin() && !isguestuser()) {
                     <!-- DataTales Example -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary" style="color: #2949c2 !important;">Usuarios registrados</h6>
+                            <h6 class="m-0 font-weight-bold text-primary" style="color: #2949c2 !important;">Calificaciones</h6>
                         </div>
                         <div class="card-body">
+                            <section class="section_general">
+                                <div class="filters">
+                                    <div class="filter-group date-filters">
+                                        <div class="sub-filter-group">
+                                            <label>
+                                                Curso
+                                                <select id="cursoSelectCal" class="form-control">
+                                                    <option value="">Todos</option>
+                                                </select>
+                                            </label>
+
+                                             <label>
+                                                Estudiante
+                                                <select id="studentSelectCal" class="form-control">
+                                                    <option value="">Todos</option>
+                                                </select>
+                                            </label>
+
+                                           <!--  <label>
+                                                Sección
+                                                <select id="sectionSelectCal" class="form-control" disabled>
+                                                    <option value="">Seleccione un curso</option>
+                                                </select>
+                                            </label> -->
+                                        </div>
+
+                                       
+
+                                       <!--  <div class="sub-filter-group">
+                                            <label>
+                                                Fecha inicio
+                                                <input type="date" id="dateStartCal" class="form-control">
+                                            </label>
+
+                                            <label>
+                                                Fecha fin
+                                                <input type="date" id="dateEndCal" class="form-control">
+                                            </label>
+                                        </div> -->
+
+                                        <div style="margin-top: 1rem;">
+                                            <button id="clearFiltersCal" class="btn btn-secondary">
+                                                Limpiar filtros
+                                            </button>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </section>
+
                             <div class="table-responsive">
                                 <table class="table table-bordered" id="dataTable_todos_users_grades" width="100%" cellspacing="0">
                                     <thead>
@@ -587,7 +638,160 @@ if (isloggedin() && !isguestuser()) {
         color: #fff !important;
     }
 
-    .stat-card .col-auto i{
+    .stat-card .col-auto i {
         color: #2949c2 !important;
+    }
+
+    .section_general {
+        width: 85vw;
+    }
+
+    @media (min-width: 768px) {
+        .section_general {
+            width: 100%;
+        }
+    }
+
+    .section_general {
+        padding: 16px;
+        background: #f9fafb;
+        border-radius: 12px;
+    }
+
+    .filters {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    /* Curso / Estudiante */
+    .filter-group {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .filter-group label {
+        display: flex;
+        flex-direction: column;
+        font-size: 14px;
+        font-weight: 600;
+        color: #374151;
+        min-width: 220px;
+        width: 100%;
+    }
+
+    .filter-group select {
+        margin-top: 6px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        font-size: 14px;
+    }
+
+    /* Separador */
+    .filters-divider {
+        border: none;
+        height: 1px;
+        background: #e5e7eb;
+        margin: 4px 0;
+    }
+
+    /* Fechas */
+    .date-filters {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        padding: 16px;
+        background: #ffffff;
+        border-radius: 10px;
+        border: 1px solid #e5e7eb;
+    }
+
+    .date-field {
+        display: flex;
+        flex-direction: column;
+        min-width: 180px;
+    }
+
+    .date-field label {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #374151;
+    }
+
+    .date-field input[type="date"] {
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        font-size: 14px;
+    }
+
+    /* Botones */
+    .date-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 160px;
+    }
+
+    .date-actions button {
+        padding: 10px;
+        border-radius: 8px;
+        border: none;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .date-actions button#applyFilter,
+    .date-actions button#applyFilterQuiz {
+        background: #2563eb;
+        color: white;
+    }
+
+    .date-actions button.secondary {
+        background: #e5e7eb;
+        color: #374151;
+    }
+
+    .date-actions button:hover {
+        opacity: 0.9;
+    }
+
+    .date-field-contain {
+        width: 100%;
+    }
+
+    @media (min-width: 768px) {
+        .filters {
+            flex-direction: row;
+        }
+
+        .date-filters {
+            width: 100%;
+        }
+
+        .date-field-contain {
+            width: 50%;
+        }
+
+        .date-actions {
+            margin: auto;
+        }
+    }
+
+    .sub-filter-group {
+        display: flex;
+        width: 100%;
+        flex-direction: column;
+    }
+
+    @media (min-width: 768px) {
+        .sub-filter-group {
+            gap: 1rem;
+            flex-direction: row;
+        }
     }
 </style>

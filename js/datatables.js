@@ -1102,12 +1102,19 @@ $(document).ready(function () {
     });
   });
   // Inicializar DataTable de todos los usuarios con calificaciones
-  $("#dataTable_todos_users_grades").DataTable({
+  var tablaUsersGrades = $("#dataTable_todos_users_grades").DataTable({
     processing: true,
     serverSide: true,
     ajax: {
       url: moodle_Wroot + "/local/dashboard/ajax/get_todos_user_grades.php",
       type: "GET",
+      data: function (d) {
+        d.userid = $("#studentSelectCal").val() || 0;
+        d.courseid = $("#cursoSelectCal").val() || null;
+        d.sectionid = $("#sectionSelectCal").val() || 0;
+        d.datestart = $("#dateStartCal").val();
+        d.dateend = $("#dateEndCal").val();
+      },
       dataSrc: "data",
     },
     columns: [
@@ -1163,6 +1170,149 @@ $(document).ready(function () {
         },
       },
     ],
+  });
+
+  $(document).ready(function () {
+    // Mostrar estado de carga
+    $("#cursoSelectCal")
+      .html('<option value="">Cargando cursos...</option>')
+      .prop("disabled", true);
+
+    $.ajax({
+      url: moodleWroot + "/local/dashboard/ajax/get_cursos.php",
+      type: "GET",
+      dataType: "json",
+      success: function (response) {
+        $("#cursoSelectCal")
+          .html('<option value="">Todos</option>')
+          .prop("disabled", false);
+
+        if (response.data) {
+          response.data.forEach(function (curso) {
+            $("#cursoSelectCal").append(
+              `<option value="${curso.id}">${curso.fullname}</option>`,
+            );
+          });
+        }
+      },
+      error: function (xhr) {
+        $("#cursoSelectCal").html('<option value="">Error al cargar</option>');
+        console.error("Error cargando cursos", xhr.responseText);
+      },
+    });
+  });
+
+  /* $("#cursoSelectCal").on("change", function () {
+    let courseid = $(this).val();
+
+    $("#sectionSelectCal")
+      .html('<option value="">Cargando secciones...</option>')
+      .prop("disabled", true);
+
+    if (!courseid) {
+      $("#sectionSelectCal")
+        .html('<option value="">Seleccione un curso</option>')
+        .prop("disabled", true);
+      tablaUsersGrades.ajax.reload();
+      return;
+    }
+
+    $.ajax({
+      url: moodleWroot + "/local/dashboard/ajax/get_sections.php",
+      type: "GET",
+      dataType: "json",
+      data: { courseid: courseid },
+      success: function (response) {
+
+        $("#sectionSelectCal")
+          .html('<option value="">Todas</option>')
+          .prop("disabled", false);
+
+        if (response.data) {
+          response.data.forEach(function (section) {
+            $("#sectionSelectCal").append(
+              `<option value="${section.id}">
+                ${section.name}
+              </option>`
+            );
+          });
+        }
+
+        tablaUsersGrades.ajax.reload();
+      },
+      error: function () {
+        $("#sectionSelectCal")
+          .html('<option value="">Error al cargar</option>')
+          .prop("disabled", true);
+      },
+    });
+  }); */
+
+  $("#cursoSelectCal").on("change", function () {
+    let courseid = $(this).val();
+
+    $("#studentSelectCal")
+      .html('<option value="">Seleccione un curso</option>')
+      .prop("disabled", true);
+
+    if (!courseid) {
+      tablaUsuariosCal.ajax.reload(null, false);
+      return;
+    }
+
+    // Estado cargando
+    $("#studentSelectCal")
+      .html('<option value="">Cargando estudiantes...</option>')
+      .prop("disabled", true);
+
+    $.ajax({
+      url: moodleWroot + "/local/dashboard/ajax/get_estudiantes.php",
+      type: "GET",
+      dataType: "json",
+      data: { courseid: courseid },
+      success: function (response) {
+        $("#studentSelectCal")
+          .html('<option value="">Todos</option>')
+          .prop("disabled", false);
+
+        if (response.data) {
+          response.data.forEach(function (u) {
+            $("#studentSelectCal").append(
+              `<option value="${u.id}">${u.fullname}</option>`,
+            );
+          });
+        }
+
+        tablaUsersGrades.ajax.reload(null, false);
+      },
+      error: function () {
+        $("#studentSelectCal")
+          .html('<option value="">Error al cargar</option>')
+          .prop("disabled", true);
+      },
+    });
+  });
+
+  $("#cursoSelectCal, #studentSelectCal, #sectionSelectCal").on("change", function () {
+    tablaUsersGrades.ajax.reload(null, false);
+  });
+
+  $("#dateStartCal, #dateEndCal").on("change", function () {
+    tablaUsersGrades.ajax.reload();
+  });
+  
+
+  $("#clearFiltersCal").on("click", function () {
+    $("#cursoSelectCal").val("");
+    $("#studentSelectCal").val("");
+   /*  $("#sectionSelectCal")
+      .html('<option value="">Seleccione un curso</option>')
+      .prop("disabled", true); */
+
+/*     $("#dateStartCal").val("");
+    $("#dateEndCal").val(""); */
+
+    tablaUsersGrades.ajax.reload();
   });
 
   // Evento para cargar los cursos y calificaciones del usuario seleccionado
@@ -1422,7 +1572,7 @@ var tablaUsuarios = $("#tablaUsuarios").DataTable({
   buttons: [
     {
       extend: "excelHtml5",
-      text: "Descargar Excel",
+      text: '<a href="#" class="btn btn-success btn-icon-split"><span class="icon text-white-50"><i class="fas fa-cloud-download-alt"></i></span><span class="text">Descargar Excel</span></a>',
       title: "Reporte Preturnos",
       exportOptions: {
         columns: ":visible",
@@ -1812,7 +1962,7 @@ var tablaSecciones = $("#tablaSecciones").DataTable({
   buttons: [
     {
       extend: "excelHtml5",
-      text: "Descargar Excel",
+      text: '<a href="#" class="btn btn-success btn-icon-split"><span class="icon text-white-50"><i class="fas fa-cloud-download-alt"></i></span><span class="text">Descargar Excel</span></a>',
       title: "Reporte Horas",
       exportOptions: {
         columns: ":visible",
@@ -1964,7 +2114,7 @@ var tablaUsuariosQuiz = $("#tablaUsuariosQuiz").DataTable({
   buttons: [
     {
       extend: "excelHtml5",
-      text: "Descargar Excel",
+      text: '<a href="#" class="btn btn-success btn-icon-split"><span class="icon text-white-50"><i class="fas fa-cloud-download-alt"></i></span><span class="text">Descargar Excel</span></a>',
       title: "Reporte Certificaciones",
       exportOptions: {
         columns: ":visible",
